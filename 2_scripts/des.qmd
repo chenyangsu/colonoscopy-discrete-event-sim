@@ -1,0 +1,552 @@
+---
+title: "des_model"
+Author: Chen-Yang Su
+format: html
+editor: visual
+---
+
+## Create Data
+
+## Cancer Parameters
+
+Stats from: https://cdn.cancer.ca/-/media/files/research/cancer-statistics/2022-statistics/2022-special-report/2022_prevalence_report_final_en.pdf?rev=7755f9f350e845d58e268a59e3be608e&hash=3F3F30CADD8CAF0049636B5A41EDBB13&\_gl=1*1qsj5js*\_gcl_aw*R0NMLjE2NzkwNzczNjQuQ2owS0NRanduOUNnQmhEakFSSXNBRDE1aDBELWlNZGRFd0dsVl80QmdaeXV2MzAyTXN6M0lXSGdCeXUxdllEbkQ3YXFqekxKNDdqay1vWWFBZ3lFRUFMd193Y0I.*\_ga*MjA3NjQ1MzcxMS4xNjc2MDQ1ODE4*\_ga_23YMKBE2C3\*MTY3OTYzODIzMC43LjEuMTY3OTYzODM2OC41Ni4wLjA
+
+```{r}
+# Male Parameters
+#p_male = 0.0625 # male CRC prevalence
+#death_male_CRC = 0.02941176 # male death from CRC
+#age_49_male = 0.041 # proportion of male cases <49 years old
+age_50_59_male = 0.11 # proportion of male cases 50-59 years old
+age_60_69_male = 0.248 # proportion of male cases 60-69 years old
+age_70_79_male = 0.327 # proportion of male cases 70-79 years old
+#age_80_male = 0.274 # proportion of male cases >80 years old
+#five_yr_surv_male = 0.66
+
+# Female Parameters
+# p_female = 0.05263158 # female CRC prevalence
+#death_female_CRC = 0.025 # female death from CRC
+#age_49_female = 0.048 # proportion of female cases <49 years old
+age_50_59_female = 0.108 # proportion of female cases 50-59 years old
+age_60_69_female = 0.213 # proportion of female cases 60-69 years old
+age_70_79_female = 0.279 # proportion of female cases 70-79 years old
+#age_80_female = 0.355 # proportion of female cases >80 years old
+#five_yr_surv_male = 0.67
+```
+
+Stats retrieved from: https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/page.cfm?Lang=E&SearchText=Quebec&DGUIDlist=2021A000224&GENDERlist=1,2,3&STATISTIClist=1,4&HEADERlist=0
+
+```{r}
+library(readxl)
+
+# Get age and sex from https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710005701&pickMembers%5B0%5D=1.6&pickMembers%5B1%5D=3.2&pickMembers%5B2%5D=4.63&cubeTimeFrame.startYear=2021&cubeTimeFrame.endYear=2058&referencePeriods=20210101%2C20580101
+
+
+set.seed(10212)  # set seed for random number generation
+
+
+NUM_PEOPLE <- 8501833	  # number of people in Quebec in 2021
+df <- read_excel("../1_data/ST2.xlsx")  # SHEET 2
+df$Male <- df$Male * 1000  # get actual number of individuals
+df$Female <- df$Female * 1000  # get actual number of individuals
+
+age <- c()
+sex <- c()
+
+for (i in 1:length(df$Male)) {
+  male_age <- rep.int(df$Age[i], round(df$Male[i]))
+  female_age <- rep.int(df$Age[i], round(df$Female[i]))  # GOTCHA: round to make sure get integer
+  age <- c(age, male_age, female_age)
+
+  male_sex <- rep("M", round(df$Male[i]))
+  female_sex <- rep("F",round(df$Female[i]))  # GOTCHA: round to make sure get integer
+  sex <- c(sex, male_sex, female_sex)
+
+}
+
+num_male_age_50_to_59 <- sum(df$Male[1:5])
+num_female_age_50_to_59 <- sum(df$Female[1:5])
+
+num_male_age_60_to_69 <- sum(df$Male[6:10])
+num_female_age_60_to_69 <- sum(df$Female[6:10])
+
+num_male_age_70_to_79 <- sum(df$Male[11:15])
+num_female_age_70_to_79 <- sum(df$Female[11:15])
+
+
+# cancer (repeated from above)
+age_50_59_male = 0.11 # proportion of male cases 50-59 years old
+age_60_69_male = 0.248 # proportion of male cases 60-69 years old
+age_70_79_male = 0.327 # proportion of male cases 70-79 years old
+age_50_59_female = 0.108 # proportion of female cases 50-59 years old
+age_60_69_female = 0.213 # proportion of female cases 60-69 years old
+age_70_79_female = 0.279 # proportion of female cases 70-79 years old)
+
+# 0 = No cancer, 1 = Cancer
+has_cancer <- c(sample(x=seq(0,1), size=num_male_age_50_to_59, replace=TRUE, prob=c(1-age_50_59_male, age_50_59_male)),
+                sample(x=seq(0,1), size=num_male_age_60_to_69, replace=TRUE, prob=c(1-age_60_69_male, age_60_69_male)),
+                sample(x=seq(0,1), size=num_male_age_70_to_79, replace=TRUE, prob=c(1-age_70_79_male, age_70_79_male)),
+                sample(x=seq(0,1), size=num_female_age_50_to_59, replace=TRUE, prob=c(1-age_50_59_female, age_50_59_female)),
+                sample(x=seq(0,1), size=num_female_age_60_to_69, replace=TRUE, prob=c(1-age_60_69_female, age_60_69_female)),
+                sample(x=seq(0,1), size=num_female_age_70_to_79, replace=TRUE, prob=c(1-age_70_79_female, age_70_79_female)))
+
+         
+data <- data.frame(age, sex, has_cancer)
+table(data$has_cancer)
+```
+
+```{r}
+# 
+# # Get age and sex from 
+# # https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710005701&pickMembers%5B0%5D=1.6&pickMembers%5B1%5D=3.1&pickMembers%5B2%5D=4.63&cubeTimeFrame.startYear=2021&cubeTimeFrame.endYear=2058&referencePeriods=20210101%2C20580101
+# set.seed(10212)  # set seed for random number generation
+# 
+# 
+# NUM_PEOPLE <- 8501833	  # number of people in Quebec in 2021
+# df <- fread("CensusProfile2021-ProfilRecensement2021-20230402074530.csv")
+# num_male_age_50_to_54 <- df[df$V1 == "Age characteristics" & df$V2 == "50 to 54 years"]$V6
+# num_female_age_50_to_54 <- df[df$V1 == "Age characteristics" & df$V2 == "50 to 54 years"]$V8
+# 
+# num_male_age_55_to_59 <- df[df$V1 == "Age characteristics" & df$V2 == "55 to 59 years"]$V6
+# num_female_age_55_to_59 <- df[df$V1 == "Age characteristics" & df$V2 == "55 to 59 years"]$V8
+# 
+# num_male_age_60_to_64 <- df[df$V1 == "Age characteristics" & df$V2 == "60 to 64 years"]$V6
+# num_female_age_60_to_64 <- df[df$V1 == "Age characteristics" & df$V2 == "60 to 64 years"]$V8
+# 
+# num_male_age_65_to_69 <- df[df$V1 == "Age characteristics" & df$V2 == "65 to 69 years"]$V6
+# num_female_age_65_to_69 <- df[df$V1 == "Age characteristics" & df$V2 == "65 to 69 years"]$V8
+# 
+# num_male_age_70_to_74 <- df[df$V1 == "Age characteristics" & df$V2 == "70 to 74 years"]$V6
+# num_female_age_70_to_74 <- df[df$V1 == "Age characteristics" & df$V2 == "70 to 74 years"]$V8
+# 
+# num_male_age_75_to_79 <- df[df$V1 == "Age characteristics" & df$V2 == "75 to 79 years"]$V6
+# num_female_age_75_to_79 <- df[df$V1 == "Age characteristics" & df$V2 == "75 to 79 years"]$V8
+# 
+# age <- c(sample(x=seq(50, 54), size=num_male_age_50_to_54, replace=TRUE),
+#          sample(x=seq(55, 59), size=num_male_age_55_to_59, replace=TRUE),
+#          sample(x=seq(60, 64), size=num_male_age_60_to_64, replace=TRUE),
+#          sample(x=seq(65, 69), size=num_male_age_65_to_69, replace=TRUE),
+#          sample(x=seq(70, 74), size=num_male_age_70_to_74, replace=TRUE),
+#          sample(x=seq(75, 79), size=num_male_age_75_to_79, replace=TRUE),
+#          sample(x=seq(50, 54), size=num_female_age_50_to_54, replace=TRUE),
+#          sample(x=seq(55, 59), size=num_female_age_55_to_59, replace=TRUE),
+#          sample(x=seq(60, 64), size=num_female_age_60_to_64, replace=TRUE),
+#          sample(x=seq(65, 69), size=num_female_age_65_to_69, replace=TRUE),
+#          sample(x=seq(70, 74), size=num_female_age_70_to_74, replace=TRUE),
+#          sample(x=seq(75, 79), size=num_female_age_75_to_79, replace=TRUE))
+# 
+# sex <- c(rep("M", num_male_age_50_to_54),
+#          rep("M", num_male_age_55_to_59),
+#          rep("M", num_male_age_60_to_64),
+#          rep("M", num_male_age_65_to_69),
+#          rep("M", num_male_age_70_to_74),
+#          rep("M", num_male_age_75_to_79),
+#          rep("F", num_female_age_50_to_54),
+#          rep("F", num_female_age_55_to_59),
+#          rep("F", num_female_age_60_to_64),
+#          rep("F", num_female_age_65_to_69),
+#          rep("F", num_female_age_70_to_74),
+#          rep("F", num_female_age_75_to_79))
+# 
+# # cancer (repeated from above)
+# age_50_59_male = 0.11 # proportion of male cases 50-59 years old
+# age_60_69_male = 0.248 # proportion of male cases 60-69 years old
+# age_70_79_male = 0.327 # proportion of male cases 70-79 years old
+# age_50_59_female = 0.108 # proportion of female cases 50-59 years old
+# age_60_69_female = 0.213 # proportion of female cases 60-69 years old
+# age_70_79_female = 0.279 # proportion of female cases 70-79 years old)
+# 
+# # 0 = No cancer, 1 = Cancer
+# has_cancer <- c(sample(x=seq(0,1),size=num_male_age_50_to_54, replace=TRUE, prob=c(1-age_50_59_male, age_50_59_male)),
+#                 sample(x=seq(0,1), size=num_male_age_55_to_59, replace=TRUE, prob=c(1-age_50_59_male, age_50_59_male)),
+#                 sample(x=seq(0,1), size=num_male_age_60_to_64, replace=TRUE, prob=c(1-age_60_69_male, age_60_69_male)),
+#                 sample(x=seq(0,1), size=num_male_age_65_to_69, replace=TRUE, prob=c(1-age_60_69_male, age_60_69_male)),
+#                 sample(x=seq(0,1), size=num_male_age_70_to_74, replace=TRUE, prob=c(1-age_70_79_male, age_70_79_male)),
+#                 sample(x=seq(0,1), size=num_male_age_75_to_79, replace=TRUE, prob=c(1-age_70_79_male, age_70_79_male)),
+#                 sample(x=seq(0,1), size=num_female_age_50_to_54, replace=TRUE, prob=c(1-age_50_59_female, age_50_59_female)),
+#                 sample(x=seq(0,1), size=num_female_age_55_to_59, replace=TRUE, prob=c(1-age_50_59_female, age_50_59_female)),
+#                 sample(x=seq(0,1), size=num_female_age_60_to_64, replace=TRUE, prob=c(1-age_60_69_female, age_60_69_female)),
+#                 sample(x=seq(0,1), size=num_female_age_65_to_69, replace=TRUE, prob=c(1-age_60_69_female, age_60_69_female)),
+#                 sample(x=seq(0,1), size=num_female_age_70_to_74, replace=TRUE, prob=c(1-age_70_79_female, age_70_79_female)),
+#                 sample(x=seq(0,1), size=num_female_age_75_to_79, replace=TRUE, prob=c(1-age_70_79_female, age_70_79_female)))
+# 
+#          
+# data <- data.frame(age, sex, has_cancer)
+
+```
+
+FIT test is recommended every 2 years. Thus, we mail a FIT test to people aged 50, 52, 54, 56, 58, 60, ..., 78 years of age
+
+```{r}
+# Assumed everyone is mailed FIT Test - 100%
+data$mailed_FIT <- ifelse(data$has_cancer==0, 1, 0)
+```
+
+```{r}
+
+# Scenario Analysis??
+# Mailed to 90%, 80%, 70%, 60%, 50% ... of population over 50 years old etc
+
+# 90% comply with FIT test
+data$comply_FIT <- data$mailed_FIT 
+
+# Calculate the total number of 1s in the dataframe
+total_ones <- sum(data$comply_FIT == 1)
+
+# Calculate the number of 1s to be set to 0 based on the 90% criteria
+ones_to_zero <- floor(0.1 * total_ones)
+
+# Randomly select the required number of 1s to set to 0
+ones_index <- which(data$comply_FIT == 1)
+ones_to_zero_index <- sample(ones_index, ones_to_zero, replace = FALSE)
+
+# Set the selected 1s to 0 in the dataframe
+data$comply_FIT[ones_to_zero_index] <- 0
+
+table(data$comply_FIT)
+```
+
+## 0.05 percent test positive of all people taking FIT test
+
+```{r}
+
+data$positive_FIT <- data$comply_FIT 
+
+# Calculate the total number of 1s in the dataframe
+total_ones <- sum(data$positive_FIT == 1)
+
+# Calculate the number of 1s to be set to 0 based on the 5% criteria
+ones_to_zero <- floor(0.961 * total_ones)
+
+# Randomly select the required number of 1s to set to 0
+ones_index <- which(data$positive_FIT == 1)
+ones_to_zero_index <- sample(ones_index, ones_to_zero, replace = FALSE)
+
+# Set the selected 1s to 0 in the dataframe
+data$positive_FIT[ones_to_zero_index] <- 0
+
+table(data$positive_FIT)  # number of individuals that complied and tested positive for FIT
+```
+
+## Get data summary
+
+```{r, echo=FALSE}
+library(summarytools)
+print(dfSummary(data), file="../3_intermediate/data_summary.html")
+```
+
+## Sensitivity and Specificity (not used)
+
+I have 2526716 negative cancer individuals and 566229 cancer positive individuals. I have a test with specificity 10% and sensitivity 80%. How many individuals will be positive after the test:
+
+Use the positive predictive value (PPV) of the test, which is the probability that a positive test result indicates the presence of the disease.
+
+PPV = (True Positive Rate \* Prevalence) / \[(True Positive Rate \* Prevalence) + (False Positive Rate \* (1 - Prevalence))\]
+
+where True Positive Rate (sensitivity) = 80% False Positive Rate = 1 - Specificity = 1 - 0.1 = 0.9 Prevalence = proportion of the population that actually has cancer = 566229 / (2526716 + 566229) = 0.183
+
+Substituting the values, we get:
+
+PPV = (0.8 \* 0.183) / \[(0.8 \* 0.183) + (0.9 \* (1 - 0.183))\] PPV = 0.0999
+
+The PPV of the test is approximately 0.0999 or 9.99%.
+
+To calculate the number of individuals who will test positive, we can use the following formula:
+
+Number of individuals who test positive = Total number of individuals \* PPV
+
+Substituting the values, we get:
+
+Number of individuals who test positive = (2526716 + 566229) \* 0.0999 Number of individuals who test positive = 309341.9
+
+Rounding to the nearest whole number, the number of individuals who will test positive after the test is approximately 309342.
+
+# Discrete event simulation
+
+## Notes
+
+References: https://www.supplychaindataanalytics.com/simmer-in-r-for-discrete-event-simulation/ - https://r-simmer.org/index.html
+
+```{r, echo=FALSE}
+library(simmer)  # For Discrete Event Simulation
+library(magrittr)  # for pipe %>% function
+library(simmer.plot)  # for visualization of simulation results
+
+# view possible methods
+# methods(class="trajectory")
+
+# Parameters
+NUM_DAYS_IN_YEAR <- 365  # 1 year
+SCREENING_RATE = 0.45  # screening = 0.45, surveillance = 0.25, symptoms = 0.3
+
+NUM_COLONOSCOPIES_PERFORMED_2021 <- 258178  # Power BI dashboard
+THEORETICAL_ELECTIVE_ENDOSCOPIC_CAPACITY <- round(NUM_COLONOSCOPIES_PERFORMED_2021 * SCREENING_RATE)  # Number of colonoscopies delegated for screening
+CAPACITY_PER_DAY <- round(THEORETICAL_ELECTIVE_ENDOSCOPIC_CAPACITY / NUM_DAYS_IN_YEAR)  # Number of colonoscopies that can be performed in a single day
+
+# Queue size in Quebec 2021-2022 for all colonoscopies (screening, surveillance, symptoms)
+QUEUE_SIZE = round(116127 * 0.6)  # queue size of screening colonoscopies
+
+NUM_POSITIVE_FIT <- sum(data$positive_FIT == 1)  # 5% of FIT test are Positive
+
+ARRIVING_TIME <- sort(runif(NUM_POSITIVE_FIT, 0, NUM_DAYS_IN_YEAR))  # uniform distribution arrival time
+```
+
+```{r}
+
+patient <-
+  trajectory("Patient's path") %>%
+  log_("Request a colonoscopy") %>%
+  set_attribute("start_time", function() {now(colonoscopy)}) %>%
+  seize("doctor") %>%
+  log_(function() {paste("Waited: ", now(colonoscopy) - get_attribute(colonoscopy, "start_time"))}) %>%
+  timeout(1) %>%  # assume colonoscopy takes 1 time step to complete
+  release("doctor") %>%
+  log_(function() {paste("Finished: ", now(colonoscopy))})
+
+# create simulation environment
+colonoscopy <- 
+  simmer("colonoscopy") %>% 
+  add_resource("doctor", capacity=CAPACITY_PER_DAY) %>%   # Number of doctors
+  
+  # set initial queue size: people enter at time 0
+  add_generator(name_prefix = "Initial Queued",
+                trajectory = patient,
+                distribution = at(rep(0, QUEUE_SIZE)),
+                mon=2) %>%
+
+  add_generator(name_prefix = "Patient", 
+                trajectory = patient,  
+                distribution = at(ARRIVING_TIME),
+                mon=2)
+
+
+
+colonoscopy %>% run(until = NUM_DAYS_IN_YEAR) %>% get_mon_attributes()  # get resource queue related data
+  
+colonoscopy %>% get_mon_arrivals() %>% transform(waiting_time = end_time - start_time - activity_time)  # get stats
+
+result <- colonoscopy %>% get_mon_arrivals() %>% transform(waiting_time = end_time - start_time - activity_time)  # get stats
+
+# paste("Average wait for ", sum(result$finished), " completions was ",
+#       mean(result$waiting_time), "days")
+
+```
+
+```{r}
+paste("Median wait for ", sum(result$finished), " completions was ",
+      median(result$waiting_time), "days")
+get_queue_count(colonoscopy, "doctor")
+```
+
+# Visualize simulation results
+
+Reference: https://r-simmer.org/extensions/plot/index.html
+
+Overall resource utilization. Top bar shows the median utilization.
+
+```{r}
+resources <- get_mon_resources(colonoscopy)
+plot(resources, metric = "utilization")
+ggsave("../4_output/fig3a.svg")
+```
+
+Look at resources' activity during the simulation.
+
+```{r}
+plot(resources, metric = "usage", c("doctor"), items = "server")  # server represents the resource itself
+ggsave("../4_output/fig3b.png", dpi=300)
+
+```
+
+```{r}
+plot(get_mon_resources(colonoscopy), metric = "usage", "doctor", items = "server", steps = TRUE)
+ggsave("../4_output/fig3c.png", dpi=300)
+
+```
+
+Next we can have a look at the evolution of the arrivals' flow time during the simulation. In the plot below, each individual line represents a replication. A smooth line (blue) is drawn over them. All arrivals that didn't finish their entire trajectory are excluded from the plot.
+
+```{r}
+arrivals <- get_mon_arrivals(colonoscopy)
+plot(arrivals, metric = "waiting_time")
+ggsave("../4_output/fig3d.svg")
+
+```
+
+```{r}
+# Plotting simmer trajectories using simmer.plot package
+# Visualise diagrams of trajectory objects
+get_palette <- scales::brewer_pal(type = "qual", palette = 1)
+plot(patient, fill = get_palette)
+```
+
+
+
+
+
+
+# Archived Code
+
+```{r}
+age = 100
+sex = "M"
+colonoscopy <- 
+  simmer("colonoscopy") %>% 
+  add_generator("patient", trajectory = trajectory() %>%
+                       set_attribute("age", function() age) %>%
+                       set_attribute("sex", function() sex) %>%
+                       seize("resource", function() rnorm(1, mean = 10, sd = 2)) %>%
+                       timeout(function() rnorm(1, mean = 30, sd = 5)) %>%
+                       release("resource"))
+```
+
+```{r}
+library(simmer)
+
+set.seed(10212)
+
+customer <-
+  trajectory("Customer's path") %>%
+  log_("Here I am") %>%
+  timeout(10) %>%
+  log_("I must leave")
+
+bank <-
+  simmer("bank") %>%
+  add_generator("Customer", customer, at(1, 5, 12))
+  # add_generator("Customer", customer, from_to(0, 41, function() {1}))
+
+bank %>% run(until = 100)
+bank %>% get_mon_arrivals()
+
+```
+
+```{r}
+library(simmer)
+
+set.seed(1269)
+
+customer <-
+  trajectory("Customer's path") %>%
+  log_("Here I am") %>%
+  set_attribute("start_time", function() {now(bank)}) %>%
+  seize("counter") %>%
+  log_(function() {paste("Waited: ", now(bank) - get_attribute(bank, "start_time"))}) %>%
+  timeout(1) %>%
+  release("counter") %>%
+  log_(function() {paste("Finished: ", now(bank))})
+
+bank <-
+  simmer("bank") %>%
+  add_resource("counter", 2) %>% # Here is the change
+  add_generator("Customer", customer, function() {c(0, rexp(4, 1/10), -1)})
+
+bank %>% run(until = 400)
+bank %>%
+  get_mon_arrivals() %>%
+  transform(waiting_time = end_time - start_time - activity_time)
+```
+
+```{r}
+library(simmer)
+
+set.seed(100005)
+
+customer <-
+  trajectory("Customer's path") %>%
+  seize("counter") %>%
+  timeout(function() {rexp(1, 1/12)}) %>%
+  release("counter")
+
+bank <-
+  simmer("bank") %>%
+  add_resource("counter", 2) %>%
+  add_generator("Customer", customer, function() {c(0, rexp(49, 1/10), -1)})
+
+bank %>% run(until = 1000)
+
+result <- bank %>%
+  get_mon_arrivals() %>%
+  transform(waiting_time = end_time - start_time - activity_time)
+
+```
+
+```{r}
+paste("Average wait for ", sum(result$finished), " completions was ",
+      mean(result$waiting_time), "minutes.")
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r, echo=FALSE}
+
+
+patient <- trajectory("patients' path") %>%
+  ## add an intake activity 
+  seize("nurse", 1) %>%
+  timeout(function() rnorm(1, 15)) %>%
+  release("nurse", 1) %>%
+  ## add a consultation activity
+  seize("doctor", 1) %>%
+  timeout(function() rnorm(1, 20)) %>%
+  release("doctor", 1) %>%
+  ## add a planning activity
+  seize("administration", 1) %>%
+  timeout(function() rnorm(1, 5)) %>%
+  release("administration", 1)
+
+env %>%
+  add_resource("nurse", 1) %>%
+  add_resource("doctor", 2) %>%
+  add_resource("administration", 1) %>%
+  add_generator("patient", patient, function() rnorm(1, 10, 2))
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+# Visualize simulation results
+
+Reference: https://r-simmer.org/extensions/plot/index.html
+
+```{r}
+# plotting the usage of machine resources
+plot(env,what="resources",metric="usage",c("machine"))
+```
+
+```{r}
+# plotting the utilization of all resources
+plot(env,what="resources",metric="utilization")
+```

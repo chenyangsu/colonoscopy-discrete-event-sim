@@ -1,6 +1,6 @@
 # Colonoscopy Discrete Event Simulation 
 
-Evaluating colonoscopy wait times and waitlist size in Quebec for individuals 50-79 years of age.
+Evaluating colonoscopy wait times and waitlist size in Quebec for individuals 50-74 years of age.
 
 ## Scripts
 

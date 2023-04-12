@@ -59,8 +59,8 @@ num_female_age_50_to_59 <- sum(df$Female[1:5])
 num_male_age_60_to_69 <- sum(df$Male[6:10])
 num_female_age_60_to_69 <- sum(df$Female[6:10])
 
-num_male_age_70_to_79 <- sum(df$Male[11:15])
-num_female_age_70_to_79 <- sum(df$Female[11:15])
+num_male_age_70_to_74 <- sum(df$Male[11:13])
+num_female_age_70_to_74 <- sum(df$Female[11:13])
 
 
 # cancer (repeated from above)
@@ -74,10 +74,10 @@ age_70_79_female = 0.279 # proportion of female cases 70-79 years old)
 # 0 = No cancer, 1 = Cancer
 has_cancer <- c(sample(x=seq(0,1), size=num_male_age_50_to_59, replace=TRUE, prob=c(1-age_50_59_male, age_50_59_male)),
                 sample(x=seq(0,1), size=num_male_age_60_to_69, replace=TRUE, prob=c(1-age_60_69_male, age_60_69_male)),
-                sample(x=seq(0,1), size=num_male_age_70_to_79, replace=TRUE, prob=c(1-age_70_79_male, age_70_79_male)),
+                sample(x=seq(0,1), size=num_male_age_70_to_74, replace=TRUE, prob=c(1-age_70_79_male, age_70_79_male)),
                 sample(x=seq(0,1), size=num_female_age_50_to_59, replace=TRUE, prob=c(1-age_50_59_female, age_50_59_female)),
                 sample(x=seq(0,1), size=num_female_age_60_to_69, replace=TRUE, prob=c(1-age_60_69_female, age_60_69_female)),
-                sample(x=seq(0,1), size=num_female_age_70_to_79, replace=TRUE, prob=c(1-age_70_79_female, age_70_79_female)))
+                sample(x=seq(0,1), size=num_female_age_70_to_74, replace=TRUE, prob=c(1-age_70_79_female, age_70_79_female)))
 
 
 

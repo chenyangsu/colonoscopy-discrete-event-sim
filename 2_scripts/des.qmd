@@ -69,8 +69,8 @@ num_female_age_50_to_59 <- sum(df$Female[1:5])
 num_male_age_60_to_69 <- sum(df$Male[6:10])
 num_female_age_60_to_69 <- sum(df$Female[6:10])
 
-num_male_age_70_to_79 <- sum(df$Male[11:15])
-num_female_age_70_to_79 <- sum(df$Female[11:15])
+num_male_age_70_to_74 <- sum(df$Male[11:13])
+num_female_age_70_to_74 <- sum(df$Female[11:13])
 
 
 # cancer (repeated from above)
@@ -84,10 +84,10 @@ age_70_79_female = 0.279 # proportion of female cases 70-79 years old)
 # 0 = No cancer, 1 = Cancer
 has_cancer <- c(sample(x=seq(0,1), size=num_male_age_50_to_59, replace=TRUE, prob=c(1-age_50_59_male, age_50_59_male)),
                 sample(x=seq(0,1), size=num_male_age_60_to_69, replace=TRUE, prob=c(1-age_60_69_male, age_60_69_male)),
-                sample(x=seq(0,1), size=num_male_age_70_to_79, replace=TRUE, prob=c(1-age_70_79_male, age_70_79_male)),
+                sample(x=seq(0,1), size=num_male_age_70_to_74, replace=TRUE, prob=c(1-age_70_79_male, age_70_79_male)),
                 sample(x=seq(0,1), size=num_female_age_50_to_59, replace=TRUE, prob=c(1-age_50_59_female, age_50_59_female)),
                 sample(x=seq(0,1), size=num_female_age_60_to_69, replace=TRUE, prob=c(1-age_60_69_female, age_60_69_female)),
-                sample(x=seq(0,1), size=num_female_age_70_to_79, replace=TRUE, prob=c(1-age_70_79_female, age_70_79_female)))
+                sample(x=seq(0,1), size=num_female_age_70_to_74, replace=TRUE, prob=c(1-age_70_79_female, age_70_79_female)))
 
          
 data <- data.frame(age, sex, has_cancer)
@@ -174,7 +174,7 @@ table(data$has_cancer)
 
 ```
 
-FIT test is recommended every 2 years. Thus, we mail a FIT test to people aged 50, 52, 54, 56, 58, 60, ..., 78 years of age
+FIT test is recommended every 2 years. Thus, we mail a FIT test to people aged 50, 52, 54, 56, 58, 60, ..., 74 years of age
 
 ```{r}
 # Assumed everyone is mailed FIT Test - 100%
@@ -357,19 +357,20 @@ ggsave("../4_output/fig3b.png", dpi=300)
 
 ```
 
-```{r}
-plot(get_mon_resources(colonoscopy), metric = "usage", "doctor", items = "server", steps = TRUE)
-ggsave("../4_output/fig3c.png", dpi=300)
-
-```
-
 Next we can have a look at the evolution of the arrivals' flow time during the simulation. In the plot below, each individual line represents a replication. A smooth line (blue) is drawn over them. All arrivals that didn't finish their entire trajectory are excluded from the plot.
 
 ```{r}
 arrivals <- get_mon_arrivals(colonoscopy)
 plot(arrivals, metric = "waiting_time")
-ggsave("../4_output/fig3d.svg")
+ggsave("../4_output/fig3c.svg")
 
+```
+
+```{r}
+# plot people entering model uniform distribution
+
+dat_arrival <- data.frame(ARRIVING_TIME)
+ggplot(data = dat_arrival, aes(x=ARRIVING_TIME, y=ARRIVING_TIME)) + geom_point()
 ```
 
 ```{r}
@@ -377,12 +378,9 @@ ggsave("../4_output/fig3d.svg")
 # Visualise diagrams of trajectory objects
 get_palette <- scales::brewer_pal(type = "qual", palette = 1)
 plot(patient, fill = get_palette)
+# ggsave("../4_output/fig3d.svg")
+
 ```
-
-
-
-
-
 
 # Archived Code
 
